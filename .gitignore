@@ -1,0 +1,31 @@
+# Firmware (PlatformIO)
+Firmware/.pio/
+Firmware/.vscode/
+*.o
+
+# KiCad — backups, lock files, and regenerable fab output.
+# Source of truth is the .kicad_pcb/.kicad_pro/.kicad_sch themselves.
+Electronics/*.lck
+~*.kicad_pcb.lck
+~*.kicad_pro.lck
+~*.kicad_sch.lck
+*-backups/
+Electronics/gerbers*/
+fp-info-cache
+
+# Blender autosave
+*.blend1
+*.blend2
+
+# Mechanical assets — not included in this repo yet (large binaries /
+# unclear redistribution rights on some reference assets). Remove this
+# line when ready to publish them.
+Mechanical/
+
+# Essay draft — not part of the published repo
+docs/Proof_of_Feeling_Essay_Draft.md
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AFFECTIVE CORE — DEBUG UPLINK</title>
+<style>
+  :root {
+    --ink: #33ff66;
+    --ink-dim: #17662f;
+    --bg: #000;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Courier New", Courier, monospace;
+    height: 100%;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px;
+    gap: 10px;
+    min-height: 100vh;
+    position: relative;
+  }
+  body.state-happy    { --ink: #33ff66; }
+  body.state-sleeping { --ink: #4d7fff; }
+  body.state-stressed { --ink: #ff3b30; }
+
+  h1 {
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    margin: 0;
+    color: var(--ink);
+    text-shadow: 0 0 6px var(--ink);
+  }
+
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  button {
+    background: #000;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  button:hover { background: var(--ink); color: #000; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { background: #000; color: var(--ink); }
+
+  #status { color: var(--ink-dim); }
+  #status.live { color: var(--ink); }
+
+  /* ─── Compact heartbeat widget, top-right corner ────────────────── */
+  #heartbox {
+    position: fixed;
+    top: 12px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    border: 1px solid var(--ink-dim);
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.6);
+  }
+  #heartlabel {
+    font-size: 16px;
+    color: var(--ink);
+    text-shadow: 0 0 4px var(--ink);
+    transition: transform 0.06s ease-out;
+  }
+  #heartlabel.beat { transform: scale(1.4); }
+  #beatinfo { min-width: 8ch; }
+  label.mute {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 22px;
+    width: 100%;
+    max-width: 1200px;
+    flex: 1;
+  }
+
+  .panel {
+    border: 1px solid var(--ink-dim);
+    padding: 10px 14px 14px;
+  }
+  .panel h2 {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    margin: 0 0 8px;
+    color: var(--ink-dim);
+  }
+
+  pre {
+    margin: 0;
+    line-height: 1.05;
+    color: var(--ink);
+    text-shadow: 0 0 5px var(--ink);
+    white-space: pre;
+  }
+
+  /* ─── Face: the dominant element ─────────────────────────────────── */
+  #face-panel {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #face-pre {
+    font-size: 8px;
+    line-height: 0.95;
+    letter-spacing: 0px;
+    text-align: center;
+    transition: transform 0.05s ease-out;
+  }
+  #face-pre.shake { animation: shake 0.28s linear; }
+  @keyframes shake {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-3px, 1px); }
+    40%  { transform: translate(3px, -1px); }
+    60%  { transform: translate(-2px, -1px); }
+    80%  { transform: translate(2px, 1px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  #readout {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 12px;
+    display: flex;
+    gap: 22px;
+  }
+  #readout b { color: var(--ink); }
+
+  /* ─── Sonar: smaller, off to the side ────────────────────────────── */
+  #radar-panel { flex: 0 0 auto; margin-top: 6px; }
+  #radar-pre { font-size: 8px; letter-spacing: 0.5px; }
+
+  footer {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-top: auto;
+    padding-top: 10px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>AFFECTIVE CORE — DEBUG UPLINK</h1>
+
+<div id="topbar">
+  <button id="connectBtn">CONNECT (BLE)</button>
+  <span id="status">DISCONNECTED</span>
+</div>
+
+<div id="heartbox">
+  <span id="heartlabel">♥</span>
+  <span id="beatinfo">-- BPM</span>
+  <label class="mute"><input type="checkbox" id="muteBox"> mute</label>
+</div>
+
+<main>
+  <div id="face-panel" class="panel">
+    <h2>STATE</h2>
+    <pre id="face-pre"></pre>
+    <div id="readout">
+      <div>DIST: <b id="distReadout">--</b> cm</div>
+      <div>SPEED: <b id="speedReadout">--</b>x</div>
+      <div>STATE: <b id="stateReadout">--</b></div>
+    </div>
+  </div>
+
+  <div id="radar-panel" class="panel">
+    <h2>SONAR</h2>
+    <pre id="radar-pre"></pre>
+  </div>
+</main>
+
+<footer>AC-7 · COMPANION SYSTEMS INC. · TRUST CALIBRATION UPLINK · NOT FOR FIELD USE</footer>
+
+<script>
+"use strict";
+
+// ─── BLE constants (must match Firmware/src/ble_telemetry.cpp) ─────────────
+const SERVICE_UUID = "0000ac71-0000-1000-8000-00805f9b34fb";
+const CHAR_UUID     = "0000ac72-0000-1000-8000-00805f9b34fb";
+
+// ─── Thresholds (cm) ─────────────────────────────────────────────────────
+const STRESSED_CM = 20;
+const HAPPY_CM     = 60;
+
+// Mirrors SERVO_SWEEP_PERIOD_MS in Firmware/include/config.h — used to
+// derive a locally-timed heartbeat that matches the physical tempo. This
+// is NOT phase-locked to the actual servo position (BLE latency makes
+// that unreliable) — it matches rate, not exact phase.
+const SERVO_SWEEP_PERIOD_MS = 2400;
+
+// ─── State ───────────────────────────────────────────────────────────────
+let distanceCm = null;
+let speedMultiplier = 1.0;
+let emotionState = "sleeping"; // sleeping | happy | stressed
+
+// ─── Face — a noise-textured silhouette blob, eyes/mouth carved out as
+// blank space, in the spirit of an image-to-ASCII conversion. The outer
+// edge is an "organic" wobble (fixed shape, same for every state — only
+// the eyes/mouth/eyebrows change), and the character texture itself
+// shimmers by re-rolling on a slow interval rather than every frame.
+
+const FACE_COLS = 74;
+const FACE_ROWS = 44;              // fine resolution so the circle reads smooth, not blocky
+const FACE_MAX_R = Math.min((FACE_COLS - 1) / 2, (FACE_ROWS - 1) / 2);
+// One character cell of distance, in the same normalized units used
+// below (accounts for the *1.93 aspect compensation in buildFaceGrid) —
+// used to size eyes/mouth/eyebrows in "N cells tall/wide" terms instead
+// of guessing fractional units that can end up smaller than a single
+// character cell. Sizes stay proportionally the same if FACE_COLS/ROWS
+// change, since ROW_UNIT/COL_UNIT scale with resolution automatically.
+const ROW_UNIT = 1.93 / FACE_MAX_R;
+const COL_UNIT = 1 / FACE_MAX_R;
+// Single repeated glyph, not a noise mix — a mix of characters reads as
+// static/clutter at this density and obscures the silhouette shape.
+const FACE_GLYPH = "0";
+
+let blinking = false;
+let nextBlinkAt = 0;
+let blinkUntil = 0;
+
+function scheduleBlink(now) {
+  nextBlinkAt = now + 1800 + Math.random() * 3200;
+}
+
+// Fixed, near-circular silhouette — same "face identity" across all
+// three emotional states. Kept very subtle (unlike the first attempt)
+// so the outline reads as a clean circle rather than a lumpy blob.
+function silhouetteR(theta) {
+  return 1 + 0.015 * Math.sin(theta * 3 + 0.7) + 0.008 * Math.sin(theta * 7 + 2.1);
+}
+
+// Precompute each cell's normalized position once — geometry doesn't
+// change frame to frame, only which cells are "on" (silhouette) does.
+const faceCells = [];
+(function buildFaceGrid() {
+  const cx = (FACE_COLS - 1) / 2;
+  const cy = (FACE_ROWS - 1) / 2;
+  const maxR = Math.min(cx, cy);
+  for (let row = 0; row < FACE_ROWS; row++) {
+    for (let col = 0; col < FACE_COLS; col++) {
+      const nx = (col - cx) / maxR;          // -1..1
+      const ny = ((row - cy) * 1.93) / maxR; // -1..1, aspect-compensated
+      const r = Math.sqrt(nx * nx + ny * ny);
+      const theta = Math.atan2(nx, -ny);
+      faceCells.push({ nx, ny, r, theta });
+    }
+  }
+})();
+
+function isInEllipse(nx, ny, cx, cy, rx, ry) {
+  const dx = (nx - cx) / rx, dy = (ny - cy) / ry;
+  return dx * dx + dy * dy <= 1;
+}
+
+function buildFace(now) {
+  if (!blinking && now >= nextBlinkAt) {
+    blinking = true;
+    blinkUntil = now + 130;
+  } else if (blinking && now >= blinkUntil) {
+    blinking = false;
+    scheduleBlink(now);
+  }
+
+  const intensity = Math.min(1, Math.max(0, (speedMultiplier - 1) / 4)); // 0..1
+
+  // Eye geometry: centers, radii — sized in cell units (ROW_UNIT/
+  // COL_UNIT) so they're guaranteed to be several characters across,
+  // not a fraction of one. Sleeping = thin closed slit (~1 cell tall).
+  // Blinking briefly closes any state's eyes the same way.
+  const eyeCx = 0.34, eyeCy = -0.20;
+  let eyeRx = COL_UNIT * 2.5, eyeRy = ROW_UNIT * 1.6;
+  if (emotionState === "sleeping") eyeRy = ROW_UNIT * 0.6;
+  if (blinking) eyeRy = ROW_UNIT * 0.5;
+
+  // Mouth: a curved band, ~2 cells thick — Sign flips the curve: smile
+  // (cup, opens up) for happy, frown (arch, opens down) for stressed,
+  // flat for sleeping. Amplitude also in cell-unit terms.
+  const mouthHalfW = 0.42, mouthY0 = 0.42, mouthThickness = ROW_UNIT * 2.2;
+  let mouthCurve = 0; // amplitude; 0 = flat. ny increases downward, so
+  // positive = center dips down relative to corners = smile (cup);
+  // negative = center rises above corners = frown (arch).
+  if (emotionState === "happy") mouthCurve = ROW_UNIT * (1.4 + 1.6 * intensity);
+  if (emotionState === "stressed") mouthCurve = -(ROW_UNIT * (1.2 + 2.0 * intensity));
+
+  let out = "";
+  for (let row = 0; row < FACE_ROWS; row++) {
+    for (let col = 0; col < FACE_COLS; col++) {
+      const idx = row * FACE_COLS + col;
+      const cell = faceCells[idx];
+      let ch = " ";
+
+      if (cell.r <= silhouetteR(cell.theta)) {
+        ch = FACE_GLYPH;
+
+        // Eyes (both sides — mirror on X)
+        if (isInEllipse(cell.nx, cell.ny, eyeCx, eyeCy, eyeRx, eyeRy) ||
+            isInEllipse(cell.nx, cell.ny, -eyeCx, eyeCy, eyeRx, eyeRy)) {
+          ch = " ";
+        }
+
+        // Stressed eyebrows — short slashes above each eye, angled inward/down
+        if (emotionState === "stressed" && !blinking) {
+          const browY = eyeCy - ROW_UNIT * 3;
+          const browSlope = (cell.nx > 0 ? -1 : 1) * 0.35;
+          const browTarget = browY + browSlope * (Math.abs(cell.nx) - eyeCx);
+          if (Math.abs(cell.nx) > eyeCx - COL_UNIT * 3 && Math.abs(cell.nx) < eyeCx + COL_UNIT * 3 &&
+              Math.abs(cell.ny - browTarget) < ROW_UNIT * 1.2) {
+            ch = " ";
+          }
+        }
+
+        // Mouth — curved band, carved as blank space
+        if (Math.abs(cell.nx) < mouthHalfW) {
+          const t = cell.nx / mouthHalfW;
+          const mouthY = mouthY0 + mouthCurve * (1 - t * t);
+          if (Math.abs(cell.ny - mouthY) < mouthThickness / 2) ch = " ";
+        }
+      } else if (emotionState === "sleeping" &&
+                 Math.abs(cell.nx) < 0.10 && cell.ny < -1.05 && cell.ny > -1.35 &&
+                 Math.floor(now / 550) % 3 >= (cell.nx > 0 ? 2 : 1)) {
+        ch = "z"; // drifting "z" above the head, only in sleeping state
+      }
+
+      out += ch;
+    }
+    out += "\n";
+  }
+  return out;
+}
+
+function classify(d) {
+  if (d === null) return "sleeping";
+  if (d <= STRESSED_CM) return "stressed";
+  if (d <= HAPPY_CM) return "happy";
+  return "sleeping";
+}
+
+let lastState = null;
+function updateFace(now) {
+  document.getElementById("face-pre").textContent = buildFace(now);
+  if (emotionState === "stressed" && lastState !== "stressed") {
+    document.getElementById("face-pre").classList.add("shake");
+    setTimeout(() => document.getElementById("face-pre").classList.remove("shake"), 280);
+  }
+  lastState = emotionState;
+}
+
+// ─── Radar (ASCII PPI sonar sweep) — smaller sidebar version ────────────
+const RADAR_COLS = 29;
+const RADAR_ROWS = 15;
+const RADAR_MAX_CM = 400;
+const RADAR_REV_MS_BASE = 4000;
+
+let sweepAngle = 0;
+let lastFrameAt = performance.now();
+let traces = [];
+
+const radarCells = [];
+(function buildRadarGrid() {
+  const cx = (RADAR_COLS - 1) / 2;
+  const cy = (RADAR_ROWS - 1) / 2;
+  const maxR = Math.min(cx, cy);
+  for (let row = 0; row < RADAR_ROWS; row++) {
+    for (let col = 0; col < RADAR_COLS; col++) {
+      const dx = (col - cx);
+      const dy = (row - cy) * 1.9;
+      const r = Math.sqrt(dx * dx + dy * dy) / maxR;
+      const theta = Math.atan2(dx, -dy);
+      radarCells.push({ r, theta, isBoundary: r > 0.94 && r <= 1.0 });
+    }
+  }
+})();
+
+function updateRadar(now) {
+  const dtMs = now - lastFrameAt;
+  lastFrameAt = now;
+
+  const revMs = RADAR_REV_MS_BASE / speedMultiplier;
+  sweepAngle += (dtMs / revMs) * Math.PI * 2;
+  sweepAngle %= Math.PI * 2;
+
+  const nearUp = sweepAngle < 0.14 || sweepAngle > Math.PI * 2 - 0.14;
+  if (nearUp && distanceCm !== null && distanceCm <= RADAR_MAX_CM) {
+    if (traces.length === 0 || now - traces[traces.length - 1].addedAt > 300) {
+      traces.push({ addedAt: now, r: Math.min(1, distanceCm / RADAR_MAX_CM) });
+    }
+  }
+  traces = traces.filter(t => now - t.addedAt < revMs * 1.6);
+
+  let out = "";
+  for (let row = 0; row < RADAR_ROWS; row++) {
+    for (let col = 0; col < RADAR_COLS; col++) {
+      const cell = radarCells[row * RADAR_COLS + col];
+      let ch = " ";
+
+      if (cell.r <= 1.0) {
+        let angDiff = Math.abs(cell.theta - sweepAngle);
+        if (angDiff > Math.PI) angDiff = Math.PI * 2 - angDiff;
+        const sweepWidth = 0.06 + cell.r * 0.03;
+
+        let traceChar = null;
+        for (const t of traces) {
+          const traceAngDiff0 = Math.min(Math.abs(cell.theta), Math.PI * 2 - Math.abs(cell.theta));
+          if (Math.abs(cell.r - t.r) < 0.08 && traceAngDiff0 < 0.16) {
+            const age = (now - t.addedAt) / (revMs * 1.6);
+            const glyphs = ["@", "O", "o", ":", ".", ","];
+            traceChar = glyphs[Math.min(glyphs.length - 1, Math.floor(age * glyphs.length))];
+          }
+        }
+
+        if (angDiff < sweepWidth) {
+          ch = "#";
+        } else if (traceChar) {
+          ch = traceChar;
+        } else if (cell.isBoundary) {
+          ch = ".";
+        } else if (Math.abs(cell.r - 0.5) < 0.02) {
+          ch = ".";
+        }
+      }
+      out += ch;
+    }
+    out += "\n";
+  }
+  document.getElementById("radar-pre").textContent = out;
+}
+
+// ─── Heartbeat (audio + compact corner widget) ──────────────────────────
+let audioCtx = null;
+let nextBeatAt = 0;
+let heartEl = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function thump(gainScale) {
+  if (!audioCtx || document.getElementById("muteBox").checked) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 70;
+  const t0 = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(0.5 * gainScale, t0 + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t0);
+  osc.stop(t0 + 0.2);
+}
+
+function flashHeart() {
+  if (!heartEl) heartEl = document.getElementById("heartlabel");
+  heartEl.classList.add("beat");
+  setTimeout(() => heartEl.classList.remove("beat"), 120);
+}
+
+function updateHeartbeat(now) {
+  const periodMs = SERVO_SWEEP_PERIOD_MS / speedMultiplier;
+  if (now >= nextBeatAt) {
+    thump(1.0);
+    flashHeart();
+    setTimeout(() => thump(0.55), periodMs * 0.18);
+    nextBeatAt = now + periodMs;
+    document.getElementById("beatinfo").textContent =
+      Math.round(60000 / periodMs) + " BPM";
+  }
+}
+
+// ─── Main animation loop ─────────────────────────────────────────────────
+function frame() {
+  const now = performance.now();
+  updateFace(now);
+  updateRadar(now);
+  updateHeartbeat(now);
+  requestAnimationFrame(frame);
+}
+scheduleBlink(performance.now());
+requestAnimationFrame(frame);
+
+// ─── BLE ─────────────────────────────────────────────────────────────────
+const connectBtn = document.getElementById("connectBtn");
+const statusEl = document.getElementById("status");
+
+function applyEmotionState() {
+  document.body.classList.remove("state-sleeping", "state-happy", "state-stressed");
+  document.body.classList.add("state-" + emotionState);
+  document.getElementById("stateReadout").textContent = emotionState.toUpperCase();
+}
+
+async function connectBLE() {
+  try {
+    ensureAudio();
+    connectBtn.disabled = true;
+    statusEl.textContent = "SCANNING...";
+
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [SERVICE_UUID] }]
+    });
+
+    statusEl.textContent = "CONNECTING...";
+    device.addEventListener("gattserverdisconnected", onDisconnected);
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    const char = await service.getCharacteristic(CHAR_UUID);
+
+    await char.startNotifications();
+    char.addEventListener("characteristicvaluechanged", onTelemetry);
+
+    statusEl.textContent = "LIVE — " + (device.name || "AC-7");
+    statusEl.classList.add("live");
+    connectBtn.textContent = "DISCONNECT";
+    connectBtn.disabled = false;
+    connectBtn.onclick = () => device.gatt.disconnect();
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "FAILED: " + err.message;
+    connectBtn.disabled = false;
+    connectBtn.onclick = connectBLE;
+  }
+}
+
+function onDisconnected() {
+  statusEl.textContent = "DISCONNECTED";
+  statusEl.classList.remove("live");
+  connectBtn.textContent = "CONNECT (BLE)";
+  connectBtn.onclick = connectBLE;
+  distanceCm = null;
+  emotionState = classify(null);
+  applyEmotionState();
+}
+
+function onTelemetry(event) {
+  const v = event.target.value; // DataView
+  distanceCm = v.getFloat32(0, true);
+  speedMultiplier = v.getFloat32(4, true);
+
+  emotionState = classify(distanceCm);
+  applyEmotionState();
+
+  document.getElementById("distReadout").textContent = distanceCm.toFixed(1);
+  document.getElementById("speedReadout").textContent = speedMultiplier.toFixed(2);
+}
+
+connectBtn.onclick = connectBLE;
+
+if (!navigator.bluetooth) {
+  statusEl.textContent = "WEB BLUETOOTH NOT AVAILABLE (use Chrome/Edge)";
+  connectBtn.disabled = true;
+}
+
+emotionState = classify(null);
+applyEmotionState();
+</script>
+</body>
+</html>
