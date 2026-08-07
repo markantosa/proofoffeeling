@@ -36,6 +36,11 @@ Board outline target: fits inside the heart shell cradle, roughly
 70mm x 50mm. Confirm against the 3D-printed shell's internal mounting boss
 positions before finalizing Edge.Cuts.
 
+**Note on BLE**: the firmware broadcasts telemetry over Bluetooth LE (for
+the debug dashboard — see `Firmware/README.md`) using the Supermini
+module's onboard radio/antenna. This needs no PCB component, footprint,
+or net of its own — nothing on this board changes because of it.
+
 ---
 
 # 2. KICAD 10 PROJECT SETUP

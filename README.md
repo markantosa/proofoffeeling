@@ -15,9 +15,9 @@ project concept and design brief.
 │   ├── design-reference.md          Project context/story + physical prototype
 │   └── pcb-design-reference.md      KiCad 10 PCB design reference
 ├── Firmware/           ESP32-C6-Supermini embedded firmware
-│   ├── src/             Servo sweep, LED chase, proximity speed, eye animation
-│   └── include/          Pin assignments and tunables
-├── dashboard/          BLE debug dashboard (ASCII face/sonar/heartbeat, Web Bluetooth)
+│   ├── src/             Servo sweep, LED chase, proximity speed, eye animation, BLE telemetry
+│   └── include/          Pin assignments, tunables, BLE UUIDs
+├── dashboard/          BLE debug dashboard — ASCII face/sonar/heartbeat, Web Bluetooth (Chrome/Edge only)
 ├── Electronics/        KiCad PCB project (single-layer milled board)
 └── Mechanical/         3D models (not yet included in this repo)
 ```
@@ -30,6 +30,7 @@ project concept and design brief.
 * 1x momentary button, wired but currently unused by firmware
 * 8x auxiliary LEDs, top-to-bottom chase ("pulse point" glow array)
 * I2C OLED (SSD1306-class), 4-pin header — always-on blinking eye
+* BLE telemetry (built-in radio) — feeds the debug dashboard, see below
 * Custom single-layer milled PCB (KiCad, `Electronics/`)
 * Powered via 5V DC barrel plug
 
@@ -39,4 +40,4 @@ project concept and design brief.
 * Firmware build/flash instructions: [`Firmware/README.md`](Firmware/README.md)
 * PCB design reference: [`docs/pcb-design-reference.md`](docs/pcb-design-reference.md)
 * KiCad project: [`Electronics/EPD 3D G6.kicad_pro`](Electronics/EPD%203D%20G6.kicad_pro)
-* BLE debug dashboard: [`dashboard/index.html`](dashboard/index.html) — open in Chrome/Edge, click Connect
+* BLE debug dashboard: [`dashboard/index.html`](dashboard/index.html) — open directly in Chrome or Edge (desktop/Android; Web Bluetooth isn't supported in Firefox/Safari), click **Connect**, pick "AC-7"

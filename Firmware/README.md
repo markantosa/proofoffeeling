@@ -20,21 +20,26 @@ full project concept and design brief.
   PWM-faded, 4 on/off — see PCB doc for the LEDC channel budget)
 * I2C OLED (SSD1306-class), 4-pin header — always-on eye animation,
   blinks at random intervals
+* BLE telemetry (built-in radio, no extra hardware) — broadcasts
+  distance + speed multiplier for the debug dashboard, see below
 * Custom single-layer milled PCB — see
   [`../docs/pcb-design-reference.md`](../docs/pcb-design-reference.md)
 
 ## Repository Layout
 
 This folder holds only the firmware; project-wide docs live in
-[`../docs/`](../docs/) at the repo root.
+[`../docs/`](../docs/) at the repo root, and the BLE debug dashboard
+lives in [`../dashboard/`](../dashboard/).
 
 ```
 .
 ├── platformio.ini          PlatformIO project config
 ├── include/
-│   └── config.h             Pin assignments and tunables
+│   ├── config.h              Pin assignments and tunables
+│   └── ble_telemetry.h       BLE service/characteristic declarations
 └── src/
-    └── main.cpp              Servo sweep, LED chase, proximity speed, eye animation
+    ├── main.cpp               Servo sweep, LED chase, proximity speed, eye animation
+    └── ble_telemetry.cpp      BLE GATT server — notifies distance + speed to the dashboard
 ```
 
 ## Build & Flash
@@ -58,8 +63,28 @@ machine in this revision (an earlier v2.0 draft had one; it's gone):
 | Servos | Sweep 0°→180°→0° continuously, mirrored between the two |
 | Speed | Both the LED chase and servo sweep speed up continuously as an object gets closer to the HC-SR04 — no discrete thresholds |
 | OLED | Always displays an eye; blinks at random intervals, independent of the above |
+| BLE | Notifies distance + speed multiplier (~10Hz) whenever a client is connected; harmless if nothing's listening |
 
 See [`../docs/design-reference.md`](../docs/design-reference.md) §2 for
 what this looks like from a viewer's side. The button (`BTN_SIG`) is
 wired but currently unused — a candidate for a future interaction if one
 gets designed.
+
+## BLE Debug Dashboard
+
+The firmware advertises as **AC-7** and exposes one GATT service (see
+`include/ble_telemetry.h` for the UUIDs) that notifies an 8-byte struct
+— `distanceCm` + `speedMultiplier` — at ~10Hz whenever a client is
+connected. [`../dashboard/index.html`](../dashboard/index.html) is a
+self-contained Web Bluetooth client for it: open it in Chrome or Edge
+(desktop or Android — Web Bluetooth isn't supported in Firefox/Safari),
+click **Connect**, and it renders:
+
+* an ASCII face (sleeping / happy / stressed, thresholded on distance)
+* an ASCII sonar sweep, pinging when something's in range
+* a heartbeat thump + visual pulse, tempo-matched (not phase-locked) to
+  the servo/LED speed
+
+It's a debugging/demo tool, not part of the physical artefact — nothing
+in `main.cpp`'s actual behaviour depends on whether a dashboard is
+connected.
