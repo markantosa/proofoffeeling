@@ -4,6 +4,10 @@
 robotic heart that makes a humanoid AI's internal state visible through
 pulse, motion, and light.
 
+<p align="center">
+  <img src="assets/Proof of Feeling Render.png" alt="Proof of Feeling — rendered artificial heart with exposed PCB, mounted on its display stand" width="520">
+</p>
+
 See [`docs/design-reference.md`](docs/design-reference.md) for the full
 project concept and design brief.
 
@@ -33,6 +37,13 @@ project concept and design brief.
 * BLE telemetry (built-in radio) — feeds the debug dashboard, see below
 * Custom single-layer milled PCB (KiCad, `Electronics/`)
 * Powered via 5V DC barrel plug
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/PCB render.jpg" alt="3D render of the populated AC-7 main board" width="300"><br><sub>Populated board render</sub></td>
+    <td align="center"><img src="assets/PCB trace view.jpg" alt="AC-7 PCB routing — single-layer milled board, B.Cu traces" width="300"><br><sub>B.Cu routing</sub></td>
+  </tr>
+</table>
 
 ## Getting Started
 
