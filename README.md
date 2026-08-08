@@ -42,6 +42,7 @@ project concept and design brief.
   <tr>
     <td align="center"><img src="assets/PCB render.jpg" alt="3D render of the populated AC-7 main board" width="300"><br><sub>Populated board render</sub></td>
     <td align="center"><img src="assets/PCB trace view.jpg" alt="AC-7 PCB routing — single-layer milled board, B.Cu traces" width="300"><br><sub>B.Cu routing</sub></td>
+    <td align="center"><img src="assets/PCB Milling.jpg" alt="AC-7 board mid-fabrication on a desktop CNC isolation mill" width="300"><br><sub>Desktop CNC isolation milling</sub></td>
   </tr>
 </table>
 
