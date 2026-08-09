@@ -115,4 +115,4 @@ compliance).
 For hardware specifics — servo/sensor/LED/display wiring, GPIO
 assignments, firmware behaviour — see
 [`pcb-design-reference.md`](pcb-design-reference.md) and
-[`../Firmware/README.md`](../Firmware/README.md).
+[`../firmware/README.md`](../firmware/README.md).

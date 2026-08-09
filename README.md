@@ -5,7 +5,8 @@ robotic heart that makes a humanoid AI's internal state visible through
 pulse, motion, and light.
 
 <p align="center">
-  <img src="assets/Proof of Feeling Render.png" alt="Proof of Feeling — rendered artificial heart with exposed PCB, mounted on its display stand" width="520">
+  <img src="assets/render.png" alt="Proof of Feeling — rendered artificial heart with exposed PCB, mounted on its display stand" width="520">
+  <br><sub>Render made in Blender.</sub>
 </p>
 
 See [`docs/design-reference.md`](docs/design-reference.md) for the full
@@ -18,25 +19,31 @@ project concept and design brief.
 ├── docs/               Project-wide documentation
 │   ├── design-reference.md          Project context/story + physical prototype
 │   └── pcb-design-reference.md      KiCad 10 PCB design reference
-├── Firmware/           ESP32-C6-Supermini embedded firmware
+├── firmware/           ESP32-C6-Supermini embedded firmware
 │   ├── src/             Servo sweep, LED chase, proximity speed, eye animation, BLE telemetry
 │   └── include/          Pin assignments, tunables, BLE UUIDs
 ├── dashboard/          BLE debug dashboard — ASCII face/sonar/heartbeat, Web Bluetooth (Chrome/Edge only)
-├── Electronics/        KiCad PCB project (single-layer milled board)
-└── Mechanical/         3D models (not yet included in this repo)
+├── electronics/        KiCad PCB project (single-layer milled board)
+└── mechanical/         3D models — printable STL/3MF tracked via Git LFS; source .blend files not included yet
 ```
 
 ## Hardware Summary
 
 * ESP32-C6-Supermini
-* 2x MG995 servos, 5V (continuous 0–180° sweep, mirrored)
+* 2x SG92R micro servos, 5V (continuous 0–180° sweep, mirrored) — chosen over MG995 for size
 * HC-SR04 ultrasonic sensor (proximity → continuous speed control)
 * 1x momentary button, wired but currently unused by firmware
 * 8x auxiliary LEDs, top-to-bottom chase ("pulse point" glow array)
 * I2C OLED (SSD1306-class), 4-pin header — always-on blinking eye
 * BLE telemetry (built-in radio) — feeds the debug dashboard, see below
-* Custom single-layer milled PCB (KiCad, `Electronics/`)
+* Custom single-layer milled PCB (KiCad, `electronics/`)
 * Powered via 5V DC barrel plug
+
+## Tools
+
+* 3D modelling — Blender
+* PCB design — KiCad
+* Firmware — written with the aid of Claude
 
 <table>
   <tr>
@@ -49,7 +56,7 @@ project concept and design brief.
 ## Getting Started
 
 * Project context, story, and what a viewer experiences: [`docs/design-reference.md`](docs/design-reference.md)
-* Firmware build/flash instructions: [`Firmware/README.md`](Firmware/README.md)
+* Firmware build/flash instructions: [`firmware/README.md`](firmware/README.md)
 * PCB design reference: [`docs/pcb-design-reference.md`](docs/pcb-design-reference.md)
-* KiCad project: [`Electronics/EPD 3D G6.kicad_pro`](Electronics/EPD%203D%20G6.kicad_pro)
+* KiCad project: [`electronics/EPD 3D G6.kicad_pro`](electronics/EPD%203D%20G6.kicad_pro)
 * BLE debug dashboard: [`dashboard/index.html`](dashboard/index.html) — open directly in Chrome or Edge (desktop/Android; Web Bluetooth isn't supported in Firefox/Safari), click **Connect**, pick "AC-7"

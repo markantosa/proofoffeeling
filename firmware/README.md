@@ -11,7 +11,7 @@ full project concept and design brief.
 ## Hardware
 
 * ESP32-C6-Supermini
-* 2x MG995 servos, 5V (continuous 0–180° sweep, mirrored)
+* 2x SG92R micro servos, 5V (continuous 0–180° sweep, mirrored) — chosen over MG995 for size
 * HC-SR04 ultrasonic sensor (proximity → continuous speed control)
 * 5V DC barrel plug power input
 * 1x momentary button — wired on the board (BTN_SIG/SW1), not read by

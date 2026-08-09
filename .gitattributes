@@ -1,6 +1,7 @@
 * text=auto eol=lf
-
 *.kicad_pcb -text
 *.kicad_pro -text
 *.kicad_sch -text
 *.kicad_prl -text
+mechanical/printables/**/*.stl filter=lfs diff=lfs merge=lfs -text
+mechanical/printables/**/*.3mf filter=lfs diff=lfs merge=lfs -text

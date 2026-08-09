@@ -17,10 +17,13 @@ fp-info-cache
 *.blend1
 *.blend2
 
-# Mechanical assets — not included in this repo yet (large binaries /
-# unclear redistribution rights on some reference assets). Remove this
-# line when ready to publish them.
-Mechanical/
+# Mechanical assets — most are not included in this repo (large source
+# .blend files / unclear redistribution rights on some reference
+# assets). Printable STL/3MF files are allow-listed below (tracked via
+# Git LFS, see .gitattributes) since they're the useful build output.
+mechanical/*
+!mechanical/printables/
+!mechanical/printables/**
 
 # Essay draft — not part of the published repo
 docs/Proof_of_Feeling_Essay_Draft.md

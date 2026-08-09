@@ -10,7 +10,7 @@
 //      object = faster chase and faster sweep
 //    - OLED always shows an eye, blinking at random intervals
 //
-//  Hardware: ESP32-C6-Supermini, 2x MG995 servo (5V, continuous sweep),
+//  Hardware: ESP32-C6-Supermini, 2x SG92R micro servo (5V, continuous sweep),
 //  HC-SR04 ultrasonic (proximity → speed), 8x auxiliary "pulse point"
 //  LEDs (4 PWM-faded + 4 on/off — LEDC channel budget, see config.h),
 //  I2C SSD1306 OLED (always-on eye animation). BLE telemetry (distance +

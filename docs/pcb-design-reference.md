@@ -37,7 +37,7 @@ Board outline target: fits inside the heart shell cradle, roughly
 positions before finalizing Edge.Cuts.
 
 **Note on BLE**: the firmware broadcasts telemetry over Bluetooth LE (for
-the debug dashboard — see `Firmware/README.md`) using the Supermini
+the debug dashboard — see `firmware/README.md`) using the Supermini
 module's onboard radio/antenna. This needs no PCB component, footprint,
 or net of its own — nothing on this board changes because of it.
 
@@ -79,10 +79,12 @@ Tuned for a typical 0.8–1.0mm end-mill / 0.1mm–0.2mm V-bit isolation job:
 | Copper-to-edge clearance | 0.5mm                        |
 
 Power nets (`+5V`, `SERVO_5V`, `GND`) should be widened to 0.8–1.0mm
-manually where routing space allows, since both servos are MG995 (5V)
-units and can draw stall currents approaching 1.5–2.5A each — the
-`SERVO_5V` trace and J1/J2/J3 connector current ratings must be sized for
-that.
+manually where routing space allows. Both servos are SG92R micro servos
+and draw stall currents in the ~650–750mA range each (~1.5A combined
+worst case) — well within what a 0.4mm trace could handle at this
+length, but the wider power-net width is cheap insurance and keeps
+`SERVO_5V` consistent with the `+5V`/`GND` nets it shares a net class
+with.
 
 ## 2.4 Net Classes
 
@@ -110,8 +112,8 @@ File → Plot, or File → Fabrication Outputs:
 # 3. POWER ARCHITECTURE
 
 * **Input**: 5V DC via a 5V barrel plug (J1), external supply rated at
-  least 5V/3A to cover two MG995 servos' combined stall current plus the
-  Supermini and LED array headroom.
+  least 5V/2A to cover two SG92R servos' combined stall current
+  (~1.5A worst case) plus the Supermini and LED array headroom.
 * **Two separate 5V nets** — this is the one subtlety worth calling out
   clearly, since it's easy to assume everything downstream of J1 is
   protected the same way:
@@ -134,9 +136,10 @@ File → Plot, or File → Fabrication Outputs:
   divided down before reaching the C6's 3.3V-only GPIO (R12/R13 divider,
   see §4). TRIG is driven by a 3.3V GPIO, which the HC-SR04 reliably reads
   as logic HIGH — no level shifting needed on TRIG.
-* **Reverse-polarity protection**: D12, a Schottky diode (e.g. SS54,
-  rated ≥3A for MG995 stall current) in series between `+5V` and
-  `SERVO_5V`. Costs ~0.3V drop on the servo rail only.
+* **Reverse-polarity protection**: D12, a Schottky diode (e.g. SS24,
+  rated ≥2A — comfortable margin over the two SG92R servos' ~1.5A
+  combined stall current) in series between `+5V` and `SERVO_5V`. Costs
+  ~0.3V drop on the servo rail only.
 
 ---
 
@@ -204,8 +207,8 @@ step.
 | U1  | ESP32-C6-Supermini, left pin row (plugs into sockets — see §5.1) | `Connector_Generic:Conn_01x10` — no stock symbol matches the Supermini's specific pinout, label each pin manually | `Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical` — stock footprint, no custom footprint needed | Only 10 of the row's 12 physical pins are used (pins 1–2 are TX/RX, unconnected); pins 11–12 (GP23/GP22) aren't wired to anything |
 | U2  | ESP32-C6-Supermini, right pin row (plugs into sockets — see §5.1) | `Connector_Generic:Conn_01x10` — same caveat as U1 | `Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical` | Only 10 of the row's 14 physical pins are used — pin 1 (BAT) and pins 12–14 (GP12/GP13/GP21) aren't wired to anything. See §5.2 for the full physical-to-schematic pin mapping |
 | J1  | Power input, 5V DC barrel plug | `Connector:Barrel_Jack` | `Connector_BarrelJack:BarrelJack_Horizontal` | Rate for ≥3A; match plug OD/ID to the chosen 5V supply |
-| D12 | Schottky diode, reverse-polarity protection (`SERVO_5V` only) | `Diode:D_Schottky` (generic Schottky symbol — set Value field to `SS54`; there is no part-specific `SS54` symbol in the stock library) | `Diode_THT:D_DO-201AD_P15.24mm_Horizontal` | Rated ≥3A for MG995 stall current |
-| J2  | Servo A header (3-pin: GND/SERVO_5V/PWM) | `Connector_Generic:Conn_01x03` | `Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical` | Pin order per schematic: GND, SERVO_5V, SERVO_A_PWM — confirm against your MG995 plug wire colors before crimping |
+| D12 | Schottky diode, reverse-polarity protection (`SERVO_5V` only) | `Diode:D_Schottky` (generic Schottky symbol — set Value field to `SS24`; there is no part-specific `SS24` symbol in the stock library) | `Diode_THT:D_DO-201AD_P15.24mm_Horizontal` | Rated ≥2A — comfortable margin over SG92R stall current |
+| J2  | Servo A header (3-pin: GND/SERVO_5V/PWM) | `Connector_Generic:Conn_01x03` | `Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical` | Pin order per schematic: GND, SERVO_5V, SERVO_A_PWM — confirm against your SG92R plug wire colors before crimping |
 | J3  | Servo B header (3-pin)         | `Connector_Generic:Conn_01x03`            | `Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical` | Same pin order as J2 |
 | J4  | HC-SR04 header (4-pin: 5V/TRIG/ECHO_5V/GND) | `Connector_Generic:Conn_01x04`       | `Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical` | Order to match sensor module silkscreen |
 | J5  | I2C OLED header (4-pin: SDA/SCL/3V3/GND) | `Connector_Generic:Conn_01x04`       | `Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical` | Pin order is SDA, SCL, 3V3, GND per schematic — this does **not** match every OLED breakout's silkscreen order, double-check before wiring |
@@ -418,10 +421,9 @@ probe points for bring-up debugging.
 4. Attach HC-SR04, verify `ECHO_3V3` never exceeds 3.3V at the R12/R13
    junction with a multimeter before trusting it against GPIO3.
 5. Attach servos one at a time, confirm `SERVO_5V` rail voltage doesn't
-   sag below ~4.5V under load (add/verify C3 if it does). MG995 stall
-   current is significantly higher than a micro servo — verify the 5V
-   barrel-plug supply and J1/D12 are rated for both servos stalling
-   simultaneously.
+   sag below ~4.5V under load (add/verify C3 if it does). SG92R stall
+   current is modest, but still verify the 5V barrel-plug supply and
+   J1/D12 are comfortably rated for both servos stalling simultaneously.
 6. Attach the OLED to J5, verify `+3V3` measures 3.0–3.3V at J5.3 before
    connecting the display, then power up and confirm the eye animation
    appears. If nothing shows, check R14/R15 are actually populated (or
