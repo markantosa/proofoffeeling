@@ -28,6 +28,9 @@ mechanical/*
 # Essay draft — not part of the published repo
 docs/Proof_of_Feeling_Essay_Draft.md
 
+# Demo video — published on YouTube instead (see README), not tracked here
+assets/*.mp4
+
 # OS
 Thumbs.db
 desktop.ini

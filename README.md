@@ -9,6 +9,13 @@ pulse, motion, and light.
   <br><sub>Render made in Blender.</sub>
 </p>
 
+<p align="center">
+  <a href="https://youtu.be/jkcCoCJa7ys">
+    <img src="https://img.youtube.com/vi/jkcCoCJa7ys/maxresdefault.jpg" alt="Proof of Feeling — short demo video (YouTube)" width="480">
+  </a>
+  <br><sub>▶ Short demo — <a href="https://youtu.be/jkcCoCJa7ys">watch on YouTube</a></sub>
+</p>
+
 See [`docs/design-reference.md`](docs/design-reference.md) for the full
 project concept and design brief.
 
@@ -44,6 +51,10 @@ project concept and design brief.
 * 3D modelling — Blender
 * PCB design — KiCad
 * Firmware — written with the aid of Claude
+
+## Credits
+
+* Heart geometry developed from [Realistic Human Heart](https://sketchfab.com/3d-models/realistic-human-heart-3f8072336ce94d18b3d0d055a1ece089) (Sketchfab)
 
 <table>
   <tr>
