@@ -51,11 +51,26 @@ static const bool PIN_LED_AUX_PWM[PIN_LED_AUX_COUNT] =
     { false, false, false, false, true, true, true, true };
 
 // ─── Servo Sweep ───────────────────────────────────────────────────────────────
+// Servo A is mechanically limited to a 90° arc, so it gets its own
+// (narrower) range. Servo B sweeps the full 180°. Both share the same
+// timing/phase (see updateServos() in main.cpp), so they still reach
+// their respective extremes at the same instant: A at its max (90°)
+// exactly when B is at 180°, A at its min (0°) exactly when B is at 0°.
+#define SERVO_A_MIN_ANGLE      0
+#define SERVO_A_MAX_ANGLE      90
 #define SERVO_MIN_ANGLE        0
 #define SERVO_MAX_ANGLE        180
 #define SERVO_PULSE_MIN        500     // µs, standard 500–2400 range
 #define SERVO_PULSE_MAX        2400
 #define SERVO_SWEEP_PERIOD_MS  4800    // time for one full 0→180→0 cycle, at rest (0.5x speed)
+
+// Hard floor on how short the sweep period is allowed to get, regardless
+// of proximity speed-up. An SG92R takes roughly 0.35-0.4s to travel a
+// full 180° one-way under light load — a period shorter than ~750ms
+// commands the servo to reverse direction before it has physically
+// finished traveling, which looks like it "stalls halfway and snaps
+// back" rather than completing its full range of motion.
+#define SERVO_SWEEP_MIN_PERIOD_MS  750
 
 // ─── LED Chase (top → bottom, wrapping) ─────────────────────────────────────────
 #define LED_PULSE_PERIOD_MS    1600    // time for the glow to sweep the full chain, at rest

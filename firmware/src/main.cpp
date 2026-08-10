@@ -5,7 +5,8 @@
 //  in this revision — that's a deliberate pivot from v2.0's
 //  RESTING/CONTACT/COMMAND/OVERLOAD/SHUTDOWN state machine):
 //    - Aux LEDs chase top-to-bottom in a wrapping pulse
-//    - Both 180° servos sweep 0→180→0 continuously, mirrored
+//    - Servo A sweeps a 90° arc (45°→135°→45°), servo B the full 180°
+//      (0→180→0), both continuously and phase-opposite (mirrored)
 //    - Ultrasonic proximity continuously scales both speeds — closer
 //      object = faster chase and faster sweep
 //    - OLED always shows an eye, blinking at random intervals
@@ -72,19 +73,30 @@ static float speedMultiplier(float distanceCm) {
 
 // ─── Servo Sweep ────────────────────────────────────────────────────────────────
 
-// Continuous triangle-wave sweep between SERVO_MIN_ANGLE/SERVO_MAX_ANGLE.
-// Period shrinks as speedMult grows. Servos are mirrored (B = 180 - A) so
-// they visibly move in opposite directions rather than in lockstep.
+// Continuous triangle-wave sweep. Servo A covers its own, narrower
+// SERVO_A_MIN/MAX_ANGLE (90°, mechanically limited); servo B covers the
+// full SERVO_MIN_ANGLE..MAX_ANGLE (180°). Both share the same phase,
+// mapped inverted into A's range, so they reach their respective
+// extremes at the same instant — A at its max exactly when B is at 180°,
+// A at its min exactly when B is at 0° — rather than moving in lockstep.
+//
+// Period shrinks as speedMult grows, but is floored at
+// SERVO_SWEEP_MIN_PERIOD_MS so it never asks the servo to reverse before
+// it's physically finished traveling the full range (see config.h for
+// why — a shorter floor is what causes the "stalls halfway, snaps back"
+// look instead of a full sweep).
 static void updateServos(float speedMult) {
     uint32_t period = (uint32_t)(SERVO_SWEEP_PERIOD_MS / speedMult);
-    if (period < 200) period = 200;   // floor — don't let the servo whip itself apart
+    if (period < SERVO_SWEEP_MIN_PERIOD_MS) period = SERVO_SWEEP_MIN_PERIOD_MS;
 
     float phase    = (float)(millis() % period) / (float)period;         // 0..1
     float triangle = (phase < 0.5f) ? (phase * 2.0f) : (2.0f - phase * 2.0f); // 0..1..0
-    int   angle    = SERVO_MIN_ANGLE + (int)(triangle * (SERVO_MAX_ANGLE - SERVO_MIN_ANGLE));
 
-    servoA.write(angle);
-    servoB.write(SERVO_MAX_ANGLE - angle);
+    int angleA = SERVO_A_MAX_ANGLE - (int)(triangle * (SERVO_A_MAX_ANGLE - SERVO_A_MIN_ANGLE));
+    int angleB = SERVO_MIN_ANGLE + (int)(triangle * (SERVO_MAX_ANGLE - SERVO_MIN_ANGLE));
+
+    servoA.write(angleA);
+    servoB.write(angleB);
 }
 
 // ─── LED Chase (top → bottom, wrapping) ─────────────────────────────────────────
@@ -171,8 +183,8 @@ void setup() {
     servoB.setPeriodHertz(50);
     servoA.attach(PIN_SERVO_A, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
     servoB.attach(PIN_SERVO_B, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
-    servoA.write(SERVO_MIN_ANGLE);
-    servoB.write(SERVO_MAX_ANGLE);
+    servoA.write(SERVO_A_MAX_ANGLE);   // matches triangle=0 state in updateServos(), no jump on first loop
+    servoB.write(SERVO_MIN_ANGLE);
 
     // Ultrasonic
     pinMode(PIN_TRIG, OUTPUT);

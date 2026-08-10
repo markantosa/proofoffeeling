@@ -53,6 +53,15 @@ project concept and design brief.
   </tr>
 </table>
 
+## Build
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/assembling AC-7.jpg" alt="AC-7 mid-assembly — 3D-printed shell, PCB, and wiring on the workbench" width="380"><br><sub>Assembly</sub></td>
+    <td align="center"><img src="assets/finished artifact.jpg" alt="Finished AC-7 artefact — assembled artificial heart on its display stand" width="380"><br><sub>Finished artefact</sub></td>
+  </tr>
+</table>
+
 ## Getting Started
 
 * Project context, story, and what a viewer experiences: [`docs/design-reference.md`](docs/design-reference.md)
