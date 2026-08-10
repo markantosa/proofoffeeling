@@ -55,7 +55,7 @@ static const bool PIN_LED_AUX_PWM[PIN_LED_AUX_COUNT] =
 #define SERVO_MAX_ANGLE        180
 #define SERVO_PULSE_MIN        500     // µs, standard 500–2400 range
 #define SERVO_PULSE_MAX        2400
-#define SERVO_SWEEP_PERIOD_MS  2400    // time for one full 0→180→0 cycle, at rest
+#define SERVO_SWEEP_PERIOD_MS  4800    // time for one full 0→180→0 cycle, at rest (0.5x speed)
 
 // ─── LED Chase (top → bottom, wrapping) ─────────────────────────────────────────
 #define LED_PULSE_PERIOD_MS    1600    // time for the glow to sweep the full chain, at rest
